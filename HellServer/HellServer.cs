@@ -31,7 +31,8 @@ namespace HellServer
             "2495752655", //Zipzop 2.1
             "2412825433", //always strive to be better
             "1829045376", //[ff0000]skip[-]
-            "2266021888" //Cheaters Chamber
+            "2266021888", //Cheaters Chamber
+            "851254413" //Side Winder
         };
         private int levelsCompleted = 0;
         private bool playerFinished = false;
