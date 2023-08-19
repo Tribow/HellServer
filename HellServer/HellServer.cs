@@ -51,7 +51,7 @@ namespace HellServer
                 Random rnd = new Random();
                 if (rnd.Next(0, 8) < 1)
                 {
-                    Server.SayChat(DistanceChat.Server("HellServer:serverVersion", "Server Version: v.1.0"));
+                    Server.SayChat(DistanceChat.Server("HellServer:serverVersion", "Server Version: v.1.1"));
                 }
 
                 playerFinished = false;
@@ -114,15 +114,20 @@ namespace HellServer
                 //Check if the player that finished actually beat the level
                 foreach (DistancePlayer player in Server.ValidPlayers)
                 {
-                    if (player.Car.FinishType == Distance::FinishType.Normal)
+                    if (player.Car != null)
                     {
-                        playerFinished = true;
-                    }
+                        if (player.Car.FinishType == Distance::FinishType.Normal)
+                        {
+                            playerFinished = true;
+                        }
 
-                    if (player.Car.Finished)
-                    {
-                        finishCount++;
+                        if (player.Car.Finished)
+                        {
+                            finishCount++;
+                        }
                     }
+                    else
+                        finishCount++;
                 }
 
                 
