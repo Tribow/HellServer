@@ -51,7 +51,7 @@ namespace HellServer
                 Random rnd = new Random();
                 if (rnd.Next(0, 8) < 1)
                 {
-                    Server.SayChat(DistanceChat.Server("HellServer:serverVersion", "Server Version: v.1.1"));
+                    Server.SayChat(DistanceChat.Server("HellServer:serverVersion", "Server Version: v1.2"));
                 }
 
                 playerFinished = false;
@@ -72,7 +72,7 @@ namespace HellServer
                 {
                     if(levelid == Server.CurrentLevel.WorkshopFileId)
                     {
-                        Server.SayChat(DistanceChat.Server("HellServer:blacklistedmessage", "This level is impossible! Due to this [FF0000]HELL[-] will continue once all players are satisfied with their time here."));
+                        Server.SayChat(DistanceChat.Server("HellServer:blacklistedmessage", "[FF4C00]This level is impossible! Due to this[-] [FF0000]HELL[-] [FF4C00]will continue once all players have given up.[-]"));
                         playerFinished = true;
                     }
                 }
@@ -134,6 +134,30 @@ namespace HellServer
 
                 //If any player beat the level and the amount of players that finished are equal to valid players it can move on.
                 if (playerFinished && finishCount >= Server.ValidPlayers.Count)
+                {
+                    Server.SayChat(DistanceChat.Server("HellServer:finished", "All players finished. Advancing to the next layer of [FF0000]HELL[-] in 10 seconds."));
+                    DistanceServerMain.Instance.GetPlugin<BasicAutoServer.BasicAutoServer>().AdvanceLevel();
+                    levelsCompleted++;
+                    playerFinished = false;
+                }
+            });
+
+            Server.OnPlayerDisconnectedEvent.Connect((handler) =>
+            {
+                bool isEveryPlayerFinished = true;
+
+                foreach (DistancePlayer player in Server.ValidPlayers)
+                {
+                    if (player.Car != null)
+                    {
+                        if (!player.Car.Finished)
+                        {
+                            isEveryPlayerFinished = false;
+                        }
+                    }
+                }
+
+                if(isEveryPlayerFinished && playerFinished)
                 {
                     Server.SayChat(DistanceChat.Server("HellServer:finished", "All players finished. Advancing to the next layer of [FF0000]HELL[-] in 10 seconds."));
                     DistanceServerMain.Instance.GetPlugin<BasicAutoServer.BasicAutoServer>().AdvanceLevel();
