@@ -32,7 +32,8 @@ namespace HellServer
             "2412825433", //always strive to be better
             "1829045376", //[ff0000]skip[-]
             "2266021888", //Cheaters Chamber
-            "851254413" //Side Winder
+            "851254413", //Side Winder
+            "585882210" //001
         };
         private int levelsCompleted = 0;
         private bool playerFinished = false;
@@ -51,7 +52,7 @@ namespace HellServer
                 Random rnd = new Random();
                 if (rnd.Next(0, 8) < 1)
                 {
-                    Server.SayChat(DistanceChat.Server("HellServer:serverVersion", "Server Version: v1.2"));
+                    Server.SayChat(DistanceChat.Server("HellServer:serverVersion", "Server Version: v1.2.1"));
                 }
 
                 playerFinished = false;
@@ -97,7 +98,7 @@ namespace HellServer
                 //The "/explain" command exists to explain hell server lmao
                 if (Regex.Match(chatMessage.Message, @"(?<=^\[[0-9A-F]{6}\].+\[FFFFFF\]: /explain).*$").Success)
                 {
-                    Server.SayChat(DistanceChat.Server("HellServer:explaintime", "HELL SERVER is a server where any Sprint level on the workshop can be randomly selected play. The server will not skip to the next level unless someone is able to beat the level or 24 hours pass. Once everyone is done playing the level the server will choose the next level."));
+                    Server.SayChat(DistanceChat.Server("HellServer:explaintime", "HELL SERVER is a server where any Sprint level on the workshop can be randomly selected play. The server will not load the next level unless someone is able to beat the level or 24 hours pass. Once everyone is done playing the level the server will choose the next level."));
                 }
 
                 //YOU CANT SKIP HERE AAHAHAHAHHA
@@ -105,65 +106,22 @@ namespace HellServer
                 {
                     Server.SayChat(DistanceChat.Server("HellServer:skiplmao", "THERE ARE NO SKIPS IN [FF0000]HELL[-]."));
                 }
+
+                //Okay I intend for this to be a fail safe of sorts but I don't want it to be abuseable. 
+                if (Regex.Match(chatMessage.Message, @"(?<=^\[[0-9A-F]{6}\].+\[FFFFFF\]: /impossible).*$").Success)
+                {
+                    Server.SayChat(DistanceChat.Server("HellServer:impossiblelevel", "Tribow write something useful here lmao."));
+                }
             });
 
             DistanceServerMain.GetEvent<Events.Instanced.Finished>().Connect((instance, data) =>
             {
-                int finishCount = 0;
-
-                //Check if the player that finished actually beat the level
-                foreach (DistancePlayer player in Server.ValidPlayers)
-                {
-                    if (player.Car != null)
-                    {
-                        if (player.Car.FinishType == Distance::FinishType.Normal)
-                        {
-                            playerFinished = true;
-                        }
-
-                        if (player.Car.Finished)
-                        {
-                            finishCount++;
-                        }
-                    }
-                    else
-                        finishCount++;
-                }
-
-                
-
-                //If any player beat the level and the amount of players that finished are equal to valid players it can move on.
-                if (playerFinished && finishCount >= Server.ValidPlayers.Count)
-                {
-                    Server.SayChat(DistanceChat.Server("HellServer:finished", "All players finished. Advancing to the next layer of [FF0000]HELL[-] in 10 seconds."));
-                    DistanceServerMain.Instance.GetPlugin<BasicAutoServer.BasicAutoServer>().AdvanceLevel();
-                    levelsCompleted++;
-                    playerFinished = false;
-                }
+                CheckIfHellCanLoadNextLevel();
             });
 
             Server.OnPlayerDisconnectedEvent.Connect((handler) =>
             {
-                bool isEveryPlayerFinished = true;
-
-                foreach (DistancePlayer player in Server.ValidPlayers)
-                {
-                    if (player.Car != null)
-                    {
-                        if (!player.Car.Finished)
-                        {
-                            isEveryPlayerFinished = false;
-                        }
-                    }
-                }
-
-                if(isEveryPlayerFinished && playerFinished)
-                {
-                    Server.SayChat(DistanceChat.Server("HellServer:finished", "All players finished. Advancing to the next layer of [FF0000]HELL[-] in 10 seconds."));
-                    DistanceServerMain.Instance.GetPlugin<BasicAutoServer.BasicAutoServer>().AdvanceLevel();
-                    levelsCompleted++;
-                    playerFinished = false;
-                }
+                CheckIfHellCanLoadNextLevel();
             });
         }
 
@@ -402,6 +360,42 @@ namespace HellServer
                 listString += $"\n{playlist[i].Name}";
             }
             Log.Info(listString);
+        }
+
+        /// <summary>
+        /// Hell will load the next level as long as a player has beaten it, otherwise it will continue to wait.
+        /// </summary>
+        private void CheckIfHellCanLoadNextLevel()
+        {
+            int finishCount = 0;
+
+            //Check if any player that finished actually beat the level. Count how many players are "finished" as well.
+            foreach (DistancePlayer player in Server.ValidPlayers)
+            {
+                if (player.Car != null)
+                {
+                    if (player.Car.FinishType == Distance::FinishType.Normal)
+                    {
+                        playerFinished = true;
+                    }
+
+                    if (player.Car.Finished)
+                    {
+                        finishCount++;
+                    }
+                }
+                else
+                    finishCount++;
+            }
+
+            //If any player beat the level and the amount of players that finished are equal to valid players it can move on.
+            if (playerFinished && finishCount >= Server.ValidPlayers.Count)
+            {
+                Server.SayChat(DistanceChat.Server("HellServer:finished", "All players finished. Advancing to the next layer of [FF0000]HELL[-] in 10 seconds."));
+                DistanceServerMain.Instance.GetPlugin<BasicAutoServer.BasicAutoServer>().AdvanceLevel();
+                levelsCompleted++;
+                playerFinished = false;
+            }
         }
     }
 
