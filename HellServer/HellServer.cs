@@ -52,7 +52,7 @@ namespace HellServer
                 Random rnd = new Random();
                 if (rnd.Next(0, 8) < 1)
                 {
-                    Server.SayChat(DistanceChat.Server("HellServer:serverVersion", "Server Version: v1.2.1"));
+                    Server.SayChat(DistanceChat.Server("HellServer:serverVersion", "Server Version: v1.2.2"));
                 }
 
                 playerFinished = false;
@@ -133,7 +133,7 @@ namespace HellServer
         System.Collections.IEnumerator FindWorkshopLevels()
         {
             updatingPlaylist = true;
-            DistanceSearchRetriever retriever = SetReceiver(WorkshopSearchParameters.GameFiles("233610"), false);
+            DistanceSearchRetriever retriever = SetReceiver(WorkshopSearchParameters.GameFiles("233610", "", WorkshopSearchParameters.SortType.Default, WorkshopSearchParameters.FilterType.Default, -1, new string[] { "Sprint" }, 1, 30), false);
 
             if (retriever == null)
             {
@@ -211,7 +211,7 @@ namespace HellServer
         System.Collections.IEnumerator UpdatePlaylist()
         {
             updatingPlaylist = true;
-            DistanceSearchRetriever retriever = SetReceiver(WorkshopSearchParameters.GameFiles("233610", "", WorkshopSearchParameters.SortType.Recent, WorkshopSearchParameters.FilterType.Default, -1, null, 1, 30), false);
+            DistanceSearchRetriever retriever = SetReceiver(WorkshopSearchParameters.GameFiles("233610", "", WorkshopSearchParameters.SortType.Recent, WorkshopSearchParameters.FilterType.Default, -1, new string[] { "Sprint" }, 1, 30), false);
             
 
             if (retriever == null)
@@ -252,7 +252,7 @@ namespace HellServer
 
                         looped++;
                         Log.Debug("Scanning for more New Workshop Levels...");
-                        retriever = SetReceiver(WorkshopSearchParameters.GameFiles("233610", "", WorkshopSearchParameters.SortType.Recent, WorkshopSearchParameters.FilterType.Default, -1, null, looped + 1, 30), true);
+                        retriever = SetReceiver(WorkshopSearchParameters.GameFiles("233610", "", WorkshopSearchParameters.SortType.Recent, WorkshopSearchParameters.FilterType.Default, -1, new string[] { "Sprint" }, looped + 1, 30), true);
                         yield return retriever.TaskCoroutine;
                         if (retriever.HasError)
                         {
