@@ -36,6 +36,8 @@ namespace HellServer
             "585882210" //001
         };
         private int levelsCompleted = 0;
+        private int objectDeaths = 0;
+        private int carDeaths = 0;
         private bool playerFinished = false;
         private bool updatingPlaylist = false; //bool not actually used but that's okay
         private bool diversionlmao = true;
@@ -54,7 +56,6 @@ namespace HellServer
                 {
                     Server.SayChat(DistanceChat.Server("HellServer:serverVersion", "Server Version: v1.2.2"));
                 }
-
                 playerFinished = false;
                 
                 if(levelsCompleted >= 300)
@@ -63,6 +64,9 @@ namespace HellServer
                     Server.SayChat(DistanceChat.Server("HellServer:serverUpdate", "[FF0000]HELL[-] is under maintenance. Don't worry you can keep playing."));
                     levelsCompleted = 0;
                 }
+
+                objectDeaths = 0;
+                carDeaths = 0;
             });
 
             //Level Start Event
@@ -112,6 +116,17 @@ namespace HellServer
                 {
                     Server.SayChat(DistanceChat.Server("HellServer:impossiblelevel", "Tribow write something useful here lmao."));
                 }
+            });
+
+            //Death Counters
+            DistanceServerMain.GetEvent<Events.Instanced.BrokeObject>().Connect((handler) =>
+            {
+                objectDeaths++;
+            });
+
+            DistanceServerMain.GetEvent<Events.Instanced.Death>().Connect((handler) =>
+            {
+                carDeaths++;
             });
 
             DistanceServerMain.GetEvent<Events.Instanced.Finished>().Connect((instance, data) =>
@@ -368,6 +383,7 @@ namespace HellServer
         private void CheckIfHellCanLoadNextLevel()
         {
             int finishCount = 0;
+            Random rnd = new Random();
 
             //Check if any player that finished actually beat the level. Count how many players are "finished" as well.
             foreach (DistancePlayer player in Server.ValidPlayers)
@@ -395,6 +411,15 @@ namespace HellServer
                 DistanceServerMain.Instance.GetPlugin<BasicAutoServer.BasicAutoServer>().AdvanceLevel();
                 levelsCompleted++;
                 playerFinished = false;
+
+                if (rnd.Next(0, 1) < 1 && objectDeaths > 0)
+                {
+                    Server.SayChat(DistanceChat.Server("HellServer:objectDies", $"Objects Destroyed: {objectDeaths}"));
+                }
+                else if (carDeaths > 0)
+                {
+                    Server.SayChat(DistanceChat.Server("HellServer:carDies", $"Deaths: {carDeaths}"));
+                }
             }
         }
     }
